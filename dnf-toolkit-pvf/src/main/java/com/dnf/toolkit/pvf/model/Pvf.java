@@ -10,15 +10,14 @@ import cn.hutool.json.JSONObject;
 import com.dnf.toolkit.pvf.enums.ScriptType;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.dnf.toolkit.pvf.util.PvfHelper.crcDecrypt;
@@ -350,6 +349,41 @@ public class Pvf {
             }
         }
         return null;
+    }
+
+    public void extractPvfToDirectory(String scriptPvfPath) {
+        List<String> directories = getTreeDict().keySet().stream().toList();
+        directories.forEach(dir -> {
+            File dirPath = new File(scriptPvfPath + "/Script/" + dir);
+            boolean success = dirPath.mkdirs();
+            if (!success && !dirPath.exists()) {
+                System.out.println(dirPath.getName() + "创建失败");
+            }
+            // 获取文件夹下对应的子文件列表
+            List<PvfFile> pvfFileList = getTreeDict().get(dir);
+            pvfFileList.forEach(
+                    f -> {
+                        try (FileOutputStream fos = new FileOutputStream(scriptPvfPath + "/Script/" + f.getPath())) {
+                            // 获取path对应的pvf子文件数据区,返回对应的字节数组
+                            fos.write(getTreeContent(f.getPath()));
+
+                            System.out.println("Written file : "
+                                    + f.getPath()
+                                    + " / Size : "
+                                    + f.getLength() + " <"
+                                    + String.format("%08X", f.getLength())
+                                    + "> / OS : "
+                                    + f.getOffset() + " <"
+                                    + String.format("%08X", f.getOffset()) + ">"
+                            );
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+            );
+
+        });
+
     }
 
     public Map<String, Object> getPlaceHolderTable() {
