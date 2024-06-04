@@ -351,7 +351,7 @@ public class Pvf {
         return null;
     }
 
-    public void extractPvfToDirectory(String scriptPvfPath) {
+    public void extractPvfToDirectory(String scriptPvfPath, boolean isVerbose) {
         List<String> directories = getTreeDict().keySet().stream().toList();
         directories.forEach(dir -> {
             File dirPath = new File(scriptPvfPath + "/Script/" + dir);
@@ -367,15 +367,17 @@ public class Pvf {
                             // 获取path对应的pvf子文件数据区,返回对应的字节数组
                             fos.write(getTreeContent(f.getPath()));
 
-                            System.out.println("Written file : "
-                                    + f.getPath()
-                                    + " / Size : "
-                                    + f.getLength() + " <"
-                                    + String.format("%08X", f.getLength())
-                                    + "> / OS : "
-                                    + f.getOffset() + " <"
-                                    + String.format("%08X", f.getOffset()) + ">"
-                            );
+                            if (isVerbose) {
+                                System.out.println("Written file : "
+                                        + f.getPath()
+                                        + " / Size : "
+                                        + f.getLength() + " <"
+                                        + String.format("%08X", f.getLength())
+                                        + "> / OS : "
+                                        + f.getOffset() + " <"
+                                        + String.format("%08X", f.getOffset()) + ">"
+                                );
+                            }
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
