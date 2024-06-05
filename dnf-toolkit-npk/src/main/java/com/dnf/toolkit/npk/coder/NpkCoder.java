@@ -5,14 +5,14 @@ import com.dnf.toolkit.npk.handle.HandleFactory;
 import com.dnf.toolkit.npk.handle.IHandle;
 import com.dnf.toolkit.npk.model.NpkImg;
 import com.dnf.toolkit.npk.model.NpkImgTable;
+import com.dnf.toolkit.npk.model.NpkTexture;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -63,6 +63,11 @@ public class NpkCoder {
     private static final Map<String, String> NPK_IMG_NAME_TABLE = new ConcurrentHashMap<>();
 
     /**
+     * 存储NPK文件名和对应img文件名列表
+     */
+    private static final Map<String, List<String>> NPK_TABLE = new ConcurrentHashMap<>();
+
+    /**
      * NPK IMG 索引表
      */
     private static final Map<String, NpkImgTable> NPK_IMG_INDEX_TABLE = new ConcurrentHashMap<>();
@@ -81,6 +86,7 @@ public class NpkCoder {
         log.info("NPK 开始初始化，{}", path);
         rootPath = path;
         loopFiles(path).parallelStream().forEach(NpkCoder::readNpkCache);
+        reverseTable();
         log.info("NPK 初始化完成，共加载{}个img", NPK_IMG_NAME_TABLE.size());
     }
 
@@ -209,5 +215,45 @@ public class NpkCoder {
 
         return npkImg;
     }
+
+    public static Map<String, String> getNpkImgNameTable() {
+        return NPK_IMG_NAME_TABLE;
+    }
+
+    public static Map<String, NpkImgTable> getNpkIndexNameTable() {
+        return NPK_IMG_INDEX_TABLE;
+    }
+
+    public static Map<String, List<String>> getNpkTable() {
+        return NPK_TABLE;
+    }
+
+    // 倒排索引
+    private static void reverseTable() {
+        List<String> imgsList = NPK_IMG_NAME_TABLE.keySet().stream().toList();
+        for (String k : imgsList) {
+            String v = NPK_IMG_NAME_TABLE.get(k);
+
+            if (!NPK_TABLE.containsKey(v)) {
+                NPK_TABLE.put(v, new ArrayList<>());
+                NPK_TABLE.get(v).add(k);
+            } else {
+                NPK_TABLE.get(v).add(k);
+            }
+        }
+    }
+
+    public static NpkTexture[] getNpkTexturesByImgName(String name) {
+        return loadImg(name).getTextures();
+    }
+
+    public static List<String> getNpkNames() {
+        return NPK_TABLE.keySet().stream().sorted().toList();
+    }
+
+    public static List<String> getImgNamesByNpkName(String name) {
+        return NPK_TABLE.get(name);
+    }
+
 
 }
