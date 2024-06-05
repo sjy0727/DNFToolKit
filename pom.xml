@@ -52,6 +52,12 @@
                 <version>1.0</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.dnf</groupId>
+                <artifactId>dnf-toolkit-pvf</artifactId>
+                <version>1.0</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

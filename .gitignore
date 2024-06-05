@@ -34,5 +34,8 @@ build/
 ### VS Code ###
 .vscode/
 
+### Java jar out ###
+/out
+
 ### Mac OS ###
 .DS_Store
